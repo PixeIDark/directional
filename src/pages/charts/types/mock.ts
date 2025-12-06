@@ -1,49 +1,45 @@
-import { apiClient } from "../../../api/client.ts";
-import type {
-  CoffeeTeam,
-  PopularSnackBrandItem,
-  SnackImpactDepartment,
-  TopCoffeeBrandItem,
-  WeeklyMoodItem,
-  WeeklyWorkoutItem,
-} from "../../../api/generated/fEHiringRESTAPI.schemas.ts";
-
-interface CoffeeConsumptionResponse {
-  teams: CoffeeTeam[];
+export interface TopCoffeeBrandItem {
+  brand: string;
+  popularity: number;
 }
 
-interface SnackImpactResponse {
-  departments: SnackImpactDepartment[];
+export interface PopularSnackBrandItem {
+  name: string;
+  share: number;
 }
 
-export const mocksApi = {
-  getTopCoffeeBrands: async () => {
-    const { data } = await apiClient.get<TopCoffeeBrandItem[]>("/mock/top-coffee-brands");
-    return data;
-  },
+export interface WeeklyMoodItem {
+  week: string;
+  happy: number;
+  tired: number;
+  stressed: number;
+}
 
-  getPopularSnackBrands: async () => {
-    const { data } = await apiClient.get<PopularSnackBrandItem[]>("/mock/popular-snack-brands");
-    return data;
-  },
+export interface WeeklyWorkoutItem {
+  week: string;
+  running: number;
+  cycling: number;
+  stretching: number;
+}
 
-  getWeeklyMoodTrend: async () => {
-    const { data } = await apiClient.get<WeeklyMoodItem[]>("/mock/weekly-mood-trend");
-    return data;
-  },
+export interface CoffeeDataPoint {
+  cups: number;
+  bugs: number;
+  productivity: number;
+}
 
-  getWeeklyWorkoutTrend: async () => {
-    const { data } = await apiClient.get<WeeklyWorkoutItem[]>("/mock/weekly-workout-trend");
-    return data;
-  },
+export interface CoffeeTeam {
+  team: string;
+  series: CoffeeDataPoint[];
+}
 
-  getCoffeeConsumption: async () => {
-    const { data } = await apiClient.get<CoffeeConsumptionResponse>("/mock/coffee-consumption");
-    return data;
-  },
+export interface SnackImpactDataPoint {
+  snacks: number;
+  meetingsMissed: number;
+  morale: number;
+}
 
-  getSnackImpact: async () => {
-    const { data } = await apiClient.get<SnackImpactResponse>("/mock/snack-impact");
-    return data;
-  },
-};
+export interface SnackImpactDepartment {
+  name: string;
+  metrics: SnackImpactDataPoint[];
+}
