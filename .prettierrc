@@ -8,5 +8,6 @@
   "printWidth": 120,
   "bracketSpacing": true,
   "endOfLine": "auto",
-  "arrowParens": "always"
+  "arrowParens": "always",
+  "plugins": ["prettier-plugin-tailwindcss"]
 }
