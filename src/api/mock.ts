@@ -17,32 +17,32 @@ interface SnackImpactResponse {
 }
 
 export const mocksApi = {
-  getTopCoffeeBrands: async () => {
+  getTopCoffeeBrands: async (): Promise<TopCoffeeBrandItem[]> => {
     const { data } = await apiClient.get<TopCoffeeBrandItem[]>("/mock/top-coffee-brands");
     return data;
   },
 
-  getPopularSnackBrands: async () => {
+  getPopularSnackBrands: async (): Promise<PopularSnackBrandItem[]> => {
     const { data } = await apiClient.get<PopularSnackBrandItem[]>("/mock/popular-snack-brands");
     return data;
   },
 
-  getWeeklyMoodTrend: async () => {
+  getWeeklyMoodTrend: async (): Promise<WeeklyMoodItem[]> => {
     const { data } = await apiClient.get<WeeklyMoodItem[]>("/mock/weekly-mood-trend");
     return data;
   },
 
-  getWeeklyWorkoutTrend: async () => {
+  getWeeklyWorkoutTrend: async (): Promise<WeeklyWorkoutItem[]> => {
     const { data } = await apiClient.get<WeeklyWorkoutItem[]>("/mock/weekly-workout-trend");
     return data;
   },
 
-  getCoffeeConsumption: async () => {
+  getCoffeeConsumption: async (): Promise<CoffeeConsumptionResponse> => {
     const { data } = await apiClient.get<CoffeeConsumptionResponse>("/mock/coffee-consumption");
     return data;
   },
 
-  getSnackImpact: async () => {
+  getSnackImpact: async (): Promise<SnackImpactResponse> => {
     const { data } = await apiClient.get<SnackImpactResponse>("/mock/snack-impact");
     return data;
   },

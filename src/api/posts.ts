@@ -39,27 +39,27 @@ interface DeleteResponse {
 }
 
 export const postsApi = {
-  getList: async (params?: GetPostsParams) => {
+  getList: async (params?: GetPostsParams): Promise<PostListResponse> => {
     const { data } = await apiClient.get<PostListResponse>("/posts", { params });
     return data;
   },
 
-  getDetail: async (id: string) => {
+  getDetail: async (id: string): Promise<Post> => {
     const { data } = await apiClient.get<Post>(`/posts/${id}`);
     return data;
   },
 
-  create: async (postData: PostCreateRequest) => {
+  create: async (postData: PostCreateRequest): Promise<Post> => {
     const { data } = await apiClient.post<Post>("/posts", postData);
     return data;
   },
 
-  update: async (id: string, postData: PostUpdateRequest) => {
+  update: async (id: string, postData: PostUpdateRequest): Promise<Post> => {
     const { data } = await apiClient.patch<Post>(`/posts/${id}`, postData);
     return data;
   },
 
-  delete: async (id: string) => {
+  delete: async (id: string): Promise<DeleteResponse> => {
     const { data } = await apiClient.delete<DeleteResponse>(`/posts/${id}`);
     return data;
   },
