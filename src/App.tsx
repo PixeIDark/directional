@@ -1,14 +1,6 @@
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import ChartsPage from "./pages/charts/ChartsPage.tsx";
-import ListPage from "./pages/posts/ListPage.tsx";
-import HomePage from "./pages/home/HomePage.tsx";
+import { RouterProvider } from "react-router-dom";
+import { router } from "./router";
 import AuthButton from "./layouts/AuthButton";
-
-const router = createBrowserRouter([
-  { path: "/", Component: HomePage },
-  { path: "/charts", Component: ChartsPage },
-  { path: "/posts", Component: ListPage },
-]);
 
 function App() {
   return (
