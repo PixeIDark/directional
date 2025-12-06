@@ -9,8 +9,3 @@ export interface Post {
   tags: string[];
   createdAt: string;
 }
-
-export interface User {
-  id: string;
-  email: string;
-}

@@ -1,5 +1,5 @@
-import type { Post, Category } from "../types/post";
-import { apiClient } from "../../../api/client.ts";
+import type { Post, Category } from "../types/post.ts";
+import { apiClient } from "./client.ts";
 
 interface GetPostsParams {
   limit?: number;

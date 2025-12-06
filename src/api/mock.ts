@@ -1,4 +1,4 @@
-import { apiClient } from "../../../api/client.ts";
+import { apiClient } from "./client.ts";
 import type {
   TopCoffeeBrandItem,
   PopularSnackBrandItem,
@@ -6,7 +6,7 @@ import type {
   WeeklyWorkoutItem,
   CoffeeTeam,
   SnackImpactDepartment,
-} from "../types/mock";
+} from "../types/mock.ts";
 
 interface CoffeeConsumptionResponse {
   teams: CoffeeTeam[];
