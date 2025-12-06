@@ -10,7 +10,11 @@ const router = createBrowserRouter([
 ]);
 
 function App() {
-  return <RouterProvider router={router}></RouterProvider>;
+  return (
+    <div className="flex h-screen flex-col items-center justify-center">
+      <RouterProvider router={router} />
+    </div>
+  );
 }
 
 export default App;
