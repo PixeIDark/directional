@@ -1,12 +1,12 @@
 import { apiClient } from "../../../api/client.ts";
 import type {
-  CoffeeTeam,
-  PopularSnackBrandItem,
-  SnackImpactDepartment,
   TopCoffeeBrandItem,
+  PopularSnackBrandItem,
   WeeklyMoodItem,
   WeeklyWorkoutItem,
-} from "../../../api/generated/fEHiringRESTAPI.schemas.ts";
+  CoffeeTeam,
+  SnackImpactDepartment,
+} from "../types/mock";
 
 interface CoffeeConsumptionResponse {
   teams: CoffeeTeam[];
