@@ -3,7 +3,7 @@ import ChartsPage from "./pages/charts/ChartsPage.tsx";
 import PostsPage from "./pages/posts/PostsPage.tsx";
 import HomePage from "./pages/home/HomePage.tsx";
 
-export const router = createBrowserRouter([
+const router = createBrowserRouter([
   { path: "/", Component: HomePage },
   { path: "/charts", Component: ChartsPage },
   { path: "/posts", Component: PostsPage },
