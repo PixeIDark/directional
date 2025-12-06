@@ -5,7 +5,7 @@ import AuthButton from "./layouts/AuthButton";
 function App() {
   return (
     <div className="relative mx-4">
-      <div className="sticky top-0 flex justify-center">
+      <div className="fixed top-0 w-full bg-white text-center">
         <AuthButton />
       </div>
       <div className="flex h-screen flex-col items-center justify-center">
