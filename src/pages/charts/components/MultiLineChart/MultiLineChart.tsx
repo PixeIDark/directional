@@ -1,8 +1,9 @@
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from "recharts";
-import type { CoffeeTeam, SnackImpactDepartment } from "../../../types/mock.ts";
-import { useChartState } from "../hooks/useChartState.ts";
-import ChartLegend from "./ChartLegend.tsx";
+import type { CoffeeTeam, SnackImpactDepartment } from "../../../../types/mock.ts";
+import { useChartState } from "../../hooks/useChartState.ts";
+import { useMultiLineChart } from "./hooks/useMultiLineChart.ts";
+import ChartLegend from "../ChartLegend.tsx";
 
 interface MultiLineChartProps {
   title: string;
@@ -16,15 +17,6 @@ interface MultiLineChartProps {
   type: "coffee" | "snack";
 }
 
-interface TooltipData {
-  x: number;
-  y: number;
-  team: string;
-  xValue: number;
-  leftValue: number;
-  rightValue: number;
-}
-
 function MultiLineChart({
   title,
   data,
@@ -36,54 +28,14 @@ function MultiLineChart({
   rightMetric,
   type,
 }: MultiLineChartProps) {
-  const [hoveredDot, setHoveredDot] = useState<string | null>(null);
-  const [tooltipData, setTooltipData] = useState<TooltipData | null>(null);
-
   const keys = useMemo(() => data.map((item) => ("team" in item ? item.team : item.name)), [data]);
   const { colors, hiddenKeys, handleColorChange, toggleVisibility } = useChartState({ keys });
-
-  const chartData = useMemo(() => {
-    const dataMap = new Map<number, Record<string, number>>();
-    data.forEach((item) => {
-      const name = "team" in item ? item.team : item.name;
-      const series = "series" in item ? item.series : item.metrics;
-
-      series.forEach((point) => {
-        const xValue = point[xAxisKey as keyof typeof point] as number;
-        const leftValue = point[leftMetric as keyof typeof point] as number;
-        const rightValue = point[rightMetric as keyof typeof point] as number;
-
-        if (!dataMap.has(xValue)) {
-          dataMap.set(xValue, { [xAxisKey]: xValue });
-        }
-        const entry = dataMap.get(xValue)!;
-        entry[`${name}_${leftMetric}`] = leftValue;
-        entry[`${name}_${rightMetric}`] = rightValue;
-      });
-    });
-    return Array.from(dataMap.values()).sort((a, b) => a[xAxisKey] - b[xAxisKey]);
-  }, [data, xAxisKey, leftMetric, rightMetric]);
-
-  const handleDotEnter = (e: React.MouseEvent, team: string, xValue: number, leftValue: number, rightValue: number) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const parent = e.currentTarget.closest(".recharts-wrapper")?.getBoundingClientRect();
-
-    if (parent) {
-      setTooltipData({
-        x: rect.left - parent.left + rect.width / 2,
-        y: rect.top - parent.top,
-        team,
-        xValue,
-        leftValue,
-        rightValue,
-      });
-    }
-  };
-
-  const handleDotLeave = () => {
-    setTooltipData(null);
-    setHoveredDot(null);
-  };
+  const { hoveredDot, setHoveredDot, tooltipData, chartData, handleDotEnter, handleDotLeave } = useMultiLineChart({
+    data,
+    xAxisKey,
+    leftMetric,
+    rightMetric,
+  });
 
   return (
     <section>
@@ -99,12 +51,12 @@ function MultiLineChart({
         <ResponsiveContainer width="100%" height={400}>
           <LineChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey={xAxisKey} label={{ value: xAxisLabel, position: "insideBottom", offset: -5 }} />
-            <YAxis yAxisId="left" label={{ value: leftYAxisLabel, angle: -90, position: "insideLeft" }} />
+            <XAxis dataKey={xAxisKey} label={{ value: xAxisLabel, position: "insideBottom", offset: -4 }} />
+            <YAxis yAxisId="left" label={{ value: leftYAxisLabel, angle: -90, position: "insideLeft", dy: 20 }} />
             <YAxis
               yAxisId="right"
               orientation="right"
-              label={{ value: rightYAxisLabel, angle: 90, position: "insideRight" }}
+              label={{ value: rightYAxisLabel, angle: 90, position: "insideRight", dy: 20 }}
             />
             {data.map((item) => {
               const name = "team" in item ? item.team : item.name;
@@ -119,6 +71,8 @@ function MultiLineChart({
                     strokeWidth={2}
                     dot={(props) => {
                       const { cx, cy, index, payload } = props;
+                      if (cx === undefined || cy === undefined) return null;
+
                       const dotId = `${name}_${leftMetric}_${index}`;
                       const isHovered = hoveredDot === dotId;
                       const pointData = series[index];
@@ -192,8 +146,6 @@ function MultiLineChart({
             })}
           </LineChart>
         </ResponsiveContainer>
-
-        {/* 커스텀 툴팁 */}
         {tooltipData && (
           <div
             className="pointer-events-none absolute rounded border border-gray-300 bg-white p-3 shadow-lg"
