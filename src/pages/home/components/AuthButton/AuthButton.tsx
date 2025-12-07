@@ -13,7 +13,12 @@ function AuthButton() {
   return (
     <div className="flex justify-center text-amber-500 underline">
       {isLoggedIn && <LogoutButton onLogout={logout} />}
-      {!isLoggedIn && <LoginButton onLogin={handleLogin} isLoading={isLoading} />}
+
+      {!isLoggedIn && !isLoading && <LoginButton onLogin={handleLogin} isLoading={false} />}
+
+      {!isLoggedIn && isLoading && (
+        <img src="/icon/spinner.svg" alt="로딩중..." className="h-5 w-5 animate-spin text-amber-500" />
+      )}
     </div>
   );
 }
