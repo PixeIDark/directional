@@ -1,5 +1,5 @@
 import { type GetPostsParams, postsApi } from "../../api/posts.ts";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { PATHS } from "../../router/path.ts";
 import { useEffect, useRef, useState, useCallback } from "react";
 import type { Post, Category } from "../../types/post.ts";
@@ -23,7 +23,7 @@ const MIN_COLUMN_WIDTHS: Record<ColumnKey, number> = {
   createdAt: 10,
 };
 
-const STORAGE_KEY = "post-list-column-widths";
+const STORAGE_KEY = "post-postList-column-widths";
 
 const loadColumnWidths = (): Record<ColumnKey, number> => {
   try {
@@ -53,18 +53,19 @@ const saveColumnWidths = (widths: Record<ColumnKey, number>) => {
 };
 
 function ListPage() {
-  const [list, setList] = useState<Post[]>([]);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [postList, setPostList] = useState<Post[]>([]);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const observerRef = useRef<HTMLDivElement>(null);
   const tableRef = useRef<HTMLTableElement>(null);
 
-  const [filters, setFilters] = useState({
-    sort: "createdAt" as "createdAt" | "title",
-    order: "desc" as "desc" | "asc",
-    category: undefined as Category | undefined,
-    search: "",
-  });
+  const filters = {
+    sort: (searchParams.get("sort") as "createdAt" | "title") || "createdAt",
+    order: (searchParams.get("order") as "desc" | "asc") || "desc",
+    category: searchParams.get("category") as Category | undefined,
+    search: searchParams.get("search") || "",
+  };
 
   const [visibleColumns, setVisibleColumns] = useState({
     id: true,
@@ -103,7 +104,7 @@ function ListPage() {
         if (cursor) params.nextCursor = cursor;
 
         const res = await postsApi.getList(params);
-        setList((prev) => (cursor ? [...prev, ...res.items] : res.items));
+        setPostList((prev) => (cursor ? [...prev, ...res.items] : res.items));
         setNextCursor(res.nextCursor);
       } catch (error) {
         console.error("로드 실패:", error);
@@ -111,10 +112,12 @@ function ListPage() {
         setIsLoading(false);
       }
     },
-    [filters]
+    [filters.sort, filters.order, filters.category, filters.search]
   );
 
   useEffect(() => {
+    setPostList([]);
+    setNextCursor(null);
     fetchPosts();
   }, [fetchPosts]);
 
@@ -186,24 +189,33 @@ function ListPage() {
   const handleFilterSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    setFilters({
-      search: (formData.get("search") as string) || "",
-      category: (formData.get("category") as Category) || undefined,
-      sort: (formData.get("sort") as "createdAt" | "title") || "createdAt",
-      order: (formData.get("order") as "asc" | "desc") || "desc",
-    });
-    setList([]);
-    setNextCursor(null);
+
+    const newParams: Record<string, string> = {};
+    const search = formData.get("search") as string;
+    const category = formData.get("category") as string;
+    const sort = formData.get("sort") as string;
+    const order = formData.get("order") as string;
+
+    if (search) newParams.search = search;
+    if (category) newParams.category = category;
+    if (sort) newParams.sort = sort;
+    if (order) newParams.order = order;
+
+    setSearchParams(newParams);
   };
 
   const handleSort = (column: "createdAt" | "title") => {
-    setFilters((prev) => ({
-      ...prev,
+    const newOrder = filters.sort === column && filters.order === "asc" ? "desc" : "asc";
+
+    const newParams: Record<string, string> = {
       sort: column,
-      order: prev.sort === column && prev.order === "asc" ? "desc" : "asc",
-    }));
-    setList([]);
-    setNextCursor(null);
+      order: newOrder,
+    };
+
+    if (filters.search) newParams.search = filters.search;
+    if (filters.category) newParams.category = filters.category;
+
+    setSearchParams(newParams);
   };
 
   const toggleColumn = (column: ColumnKey) => setVisibleColumns((prev) => ({ ...prev, [column]: !prev[column] }));
@@ -315,7 +327,7 @@ function ListPage() {
             </tr>
           </thead>
           <tbody>
-            {list.map((post) => (
+            {postList.map((post) => (
               <tr key={post.id} className="hover:bg-gray-50">
                 {visibleColumns.id && (
                   <td className="overflow-hidden border px-4 py-2 text-ellipsis whitespace-nowrap">
@@ -367,8 +379,8 @@ function ListPage() {
           {isLoading && "로딩 중..."}
         </div>
       )}
-      {!nextCursor && list.length > 0 && <div className="py-4 text-center text-gray-500">마지막 게시글</div>}
-      {!isLoading && list.length === 0 && <div className="py-8 text-center text-gray-500">게시글 없음</div>}
+      {!nextCursor && postList.length > 0 && <div className="py-4 text-center text-gray-500">마지막 게시글</div>}
+      {!isLoading && postList.length === 0 && <div className="py-8 text-center text-gray-500">게시글 없음</div>}
     </div>
   );
 }
