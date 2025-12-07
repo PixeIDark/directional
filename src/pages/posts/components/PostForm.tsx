@@ -69,9 +69,9 @@ function PostForm({ defaultValues, onSubmit, submitButtonText, isLoading }: Post
       <div>
         <select {...register("category")} className="bg-blue-200 p-1">
           <option value="">카테고리 선택</option>
-          {Object.entries(CATEGORIES).map(([value, label]) => (
-            <option key={value} value={value}>
-              {label}
+          {CATEGORIES.map((category) => (
+            <option key={category} value={category}>
+              {category}
             </option>
           ))}
         </select>
