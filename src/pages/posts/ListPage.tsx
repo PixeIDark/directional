@@ -14,11 +14,11 @@ const CATEGORY_COLORS = {
 };
 
 const MIN_COLUMN_WIDTHS: Record<ColumnKey, number> = {
-  id: 60,
-  title: 80,
-  category: 100,
-  tags: 80,
-  createdAt: 100,
+  id: 5,
+  title: 15,
+  category: 10,
+  tags: 15,
+  createdAt: 10,
 };
 
 const STORAGE_KEY = "post-list-column-widths";
@@ -26,16 +26,18 @@ const STORAGE_KEY = "post-list-column-widths";
 const loadColumnWidths = (): Record<ColumnKey, number> => {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) return JSON.parse(saved);
+    if (saved) {
+      return JSON.parse(saved);
+    }
   } catch (error) {
     console.error("로컬스토리지 로드 실패:", error);
   }
   return {
-    id: 100,
-    title: 300,
-    category: 150,
-    tags: 200,
-    createdAt: 150,
+    id: 8,
+    title: 35,
+    category: 15,
+    tags: 25,
+    createdAt: 17,
   };
 };
 
@@ -52,6 +54,7 @@ function ListPage() {
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const observerRef = useRef<HTMLDivElement>(null);
+  const tableRef = useRef<HTMLTableElement>(null);
 
   const [filters, setFilters] = useState({
     sort: "createdAt" as "createdAt" | "title",
@@ -114,7 +117,9 @@ function ListPage() {
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && nextCursor && !isLoading) fetchPosts(nextCursor);
+        if (entries[0].isIntersecting && nextCursor && !isLoading) {
+          fetchPosts(nextCursor);
+        }
       },
       { threshold: 1.0 }
     );
@@ -129,13 +134,19 @@ function ListPage() {
     const rightColumn = resizing.rightColumn;
 
     const handleMouseMove = (e: MouseEvent) => {
+      if (!tableRef.current) return;
+
+      const tableWidth = tableRef.current.offsetWidth;
       const diff = e.clientX - resizing.startX;
+      const diffPercent = (diff / tableWidth) * 100;
+
       const leftMin = MIN_COLUMN_WIDTHS[leftColumn];
       const rightMin = MIN_COLUMN_WIDTHS[rightColumn];
+
       const totalWidth = resizing.leftStartWidth + resizing.rightStartWidth;
 
-      let newLeftWidth = resizing.leftStartWidth + diff;
-      let newRightWidth = resizing.rightStartWidth - diff;
+      let newLeftWidth = resizing.leftStartWidth + diffPercent;
+      let newRightWidth = resizing.rightStartWidth - diffPercent;
 
       if (newLeftWidth < leftMin) {
         newLeftWidth = leftMin;
@@ -153,9 +164,8 @@ function ListPage() {
       }));
     };
 
-    const handleMouseUp = () => {
+    const handleMouseUp = () =>
       setResizing({ leftColumn: null, rightColumn: null, startX: 0, leftStartWidth: 0, rightStartWidth: 0 });
-    };
 
     document.addEventListener("mousemove", handleMouseMove);
     document.addEventListener("mouseup", handleMouseUp);
@@ -214,7 +224,6 @@ function ListPage() {
   ];
 
   const visibleColumnKeys = columns.filter((col) => visibleColumns[col.key]).map((col) => col.key);
-  const totalTableWidth = visibleColumnKeys.reduce((sum, key) => sum + columnWidths[key], 0);
 
   return (
     <div className="h-full p-4">
@@ -262,7 +271,7 @@ function ListPage() {
         ))}
       </div>
       <div className="overflow-x-auto">
-        <table className="border-collapse border" style={{ tableLayout: "fixed", width: `${totalTableWidth}px` }}>
+        <table ref={tableRef} className="w-full border-collapse border" style={{ tableLayout: "fixed" }}>
           <thead>
             <tr className="bg-gray-100">
               {columns.map(({ key, label, sortable }) => {
@@ -273,7 +282,7 @@ function ListPage() {
                   <th
                     key={key}
                     className="relative border px-4 py-2 text-left"
-                    style={{ width: `${columnWidths[key]}px` }}
+                    style={{ width: `${columnWidths[key]}%` }}
                   >
                     <div className="overflow-hidden text-ellipsis whitespace-nowrap">
                       {sortable ? (
