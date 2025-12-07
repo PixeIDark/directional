@@ -1,4 +1,4 @@
-import type { Post, Category } from "../types/post.ts";
+import type { Post, Category } from "../pages/posts/types/post.ts";
 import { apiClient } from "./client.ts";
 
 export interface GetPostsParams {

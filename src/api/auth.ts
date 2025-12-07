@@ -1,5 +1,9 @@
 import { apiClient } from "./client.ts";
-import type { User } from "../types/user.ts";
+
+export interface User {
+  id: string;
+  email: string;
+}
 
 interface LoginResponse {
   token: string;

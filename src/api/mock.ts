@@ -6,7 +6,7 @@ import type {
   WeeklyWorkoutItem,
   CoffeeTeam,
   SnackImpactDepartment,
-} from "../types/mock.ts";
+} from "../pages/charts/types/chart.ts";
 
 interface CoffeeConsumptionResponse {
   teams: CoffeeTeam[];
