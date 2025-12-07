@@ -4,6 +4,7 @@ import { PATHS } from "../../router/path.ts";
 import { useEffect, useRef, useState, useCallback } from "react";
 import type { Post, Category } from "../../types/post.ts";
 import { CATEGORIES } from "../../constants/post.ts";
+import Header from "../../components/Header.tsx";
 
 type ColumnKey = "id" | "title" | "category" | "tags" | "userId" | "createdAt";
 
@@ -231,12 +232,11 @@ function ListPage() {
 
   return (
     <div className="h-full">
-      <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">게시글 목록</h1>
+      <Header title="게시글 조회">
         <Link to={PATHS.POSTS.NEW} className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600">
           글쓰기
         </Link>
-      </div>
+      </Header>
       <form onSubmit={handleFilterSubmit} className="mb-4 flex gap-2">
         <input
           name="search"
@@ -246,7 +246,7 @@ function ListPage() {
           className="flex-1 rounded border px-3 py-2"
         />
         <select name="category" defaultValue={filters.category || ""} className="rounded border px-3 py-2">
-          <option value="">카테고리</option>
+          <option value="">전체</option>
           {CATEGORIES.map((category) => (
             <option key={category} value={category}>
               {category}

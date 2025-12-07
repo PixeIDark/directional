@@ -5,6 +5,7 @@ import type { PostFormDataOutput } from "../../schemas/postSchema.ts";
 import { postsApi } from "../../api/posts.ts";
 import { PATHS } from "../../router/path.ts";
 import type { Post } from "../../types/post.ts";
+import Header from "../../components/Header.tsx";
 
 function EditPage() {
   const navigate = useNavigate();
@@ -58,12 +59,11 @@ function EditPage() {
 
   return (
     <div className="h-full w-full">
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">게시글 수정</h1>
+      <Header title="게시글 수정">
         <Link to={PATHS.POSTS.LIST} className="rounded bg-gray-500 px-4 py-2 text-white hover:bg-gray-600">
           목록
         </Link>
-      </div>
+      </Header>
       <PostForm
         defaultValues={defaultValue}
         onSubmit={handleFormSubmit}

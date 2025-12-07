@@ -3,6 +3,7 @@ import type { Post } from "../../types/post.ts";
 import { PATHS } from "../../router/path.ts";
 import { postsApi } from "../../api/posts.ts";
 import { useState, useEffect } from "react";
+import Header from "../../components/Header.tsx";
 
 const CATEGORY_COLORS = {
   NOTICE: "bg-red-100 text-red-700",
@@ -60,12 +61,11 @@ function DetailPage() {
 
   return (
     <div className="h-full w-full">
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">게시글 상세</h1>
+      <Header title="게시글 상세">
         <Link to={PATHS.POSTS.LIST} className="rounded bg-gray-500 px-4 py-2 text-white hover:bg-gray-600">
           목록
         </Link>
-      </div>
+      </Header>
       <div className="space-y-6 rounded-lg border border-gray-300 bg-white p-6">
         <div className="border-b pb-4">
           <div className="mb-2 flex items-center gap-2">

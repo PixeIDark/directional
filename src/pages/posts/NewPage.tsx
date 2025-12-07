@@ -4,6 +4,7 @@ import { PATHS } from "../../router/path.ts";
 import { type PostFormDataOutput } from "../../schemas/postSchema";
 import { useState } from "react";
 import PostForm from "./components/PostForm.tsx";
+import Header from "../../components/Header.tsx";
 
 function NewPage() {
   const navigate = useNavigate();
@@ -27,12 +28,11 @@ function NewPage() {
 
   return (
     <div className="h-full w-full">
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">게시글 작성</h1>
+      <Header title="게시글 작성">
         <Link to={PATHS.POSTS.LIST} className="rounded bg-gray-500 px-4 py-2 text-white hover:bg-gray-600">
           목록
         </Link>
-      </div>
+      </Header>
       <PostForm onSubmit={handleFormSubmit} onCancel={handleCancel} submitButtonText="등록" isLoading={isLoading} />
     </div>
   );

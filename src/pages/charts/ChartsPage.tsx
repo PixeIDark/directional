@@ -11,6 +11,7 @@ import type {
 import BarDonutChart from "./components/BarDonutChart.tsx";
 import StackedChart from "./components/StackedChart.tsx";
 import { MultiLineChart } from "./components/MultiLineChart";
+import Header from "../../components/Header.tsx";
 
 function ChartsPage() {
   const [topCoffeeBrands, setTopCoffeeBrands] = useState<TopCoffeeBrandItem[]>([]);
@@ -44,7 +45,7 @@ function ChartsPage() {
 
   return (
     <div className="h-full w-full space-y-12">
-      <h1 className="text-2xl font-bold">데이터 시각화</h1>
+      <Header title="데이터 시각화" />
       <BarDonutChart title="커피 브랜드 인기도" data={topCoffeeBrands} dataKey="popularity" nameKey="brand" />
       <BarDonutChart title="인기 스낵 브랜드" data={popularSnackBrands} dataKey="share" nameKey="name" />
       <StackedChart title="주간 기분 트렌드 (%)" data={weeklyMoodTrend} dataKeys={["happy", "tired", "stressed"]} />
