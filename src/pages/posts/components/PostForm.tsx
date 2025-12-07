@@ -8,7 +8,7 @@ import {
   MAX_BODY_LENGTH,
   MAX_TAGS_COUNT,
 } from "../../../schemas/postSchema";
-import { CATEGORIES } from "../../../constants/post";
+import { CATEGORIES } from "../constants/post";
 
 interface PostFormProps {
   defaultValues?: Partial<PostFormDataInput>;
