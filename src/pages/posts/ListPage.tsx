@@ -246,7 +246,7 @@ function ListPage() {
           className="flex-1 rounded border px-3 py-2"
         />
         <select name="category" defaultValue={filters.category || ""} className="rounded border px-3 py-2">
-          <option value="">전체</option>
+          <option value="">카테고리</option>
           {CATEGORIES.map((category) => (
             <option key={category} value={category}>
               {category}
