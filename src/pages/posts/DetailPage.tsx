@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
-import type { Post } from "../../types/post.ts";
+import type { Post } from "./types/post.ts";
 import { PATHS } from "../../router/path.ts";
 import { postsApi } from "../../api/posts.ts";
 import { useState, useEffect } from "react";
@@ -41,7 +41,6 @@ function DetailPage() {
 
   const handleRemovePost = async () => {
     if (!board) return;
-
     if (!confirm("정말 삭제하시겠습니까?")) return;
 
     try {
@@ -49,14 +48,11 @@ function DetailPage() {
       navigate(PATHS.POSTS.LIST);
     } catch (err) {
       console.error("삭제 실패:", err);
-      alert("삭제에 실패했습니다.");
     }
   };
 
   if (isLoading) return <div className="py-8 text-center">로딩 중...</div>;
-
   if (error) return <div className="py-8 text-center text-red-500">{error}</div>;
-
   if (!board) return <div className="py-8 text-center text-gray-500">게시글을 찾을 수 없습니다.</div>;
 
   return (

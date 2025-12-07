@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { CATEGORIES } from "../constants/post.ts";
+import { CATEGORIES } from "../pages/posts/constants/post.ts";
 
 export const MAX_TITLE_LENGTH = 80;
 export const MAX_BODY_LENGTH = 2000;

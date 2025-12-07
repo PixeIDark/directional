@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import type { PostFormDataOutput } from "../../schemas/postSchema.ts";
 import { postsApi } from "../../api/posts.ts";
 import { PATHS } from "../../router/path.ts";
-import type { Post } from "../../types/post.ts";
+import type { Post } from "./types/post.ts";
 import Header from "../../components/Header.tsx";
 
 function EditPage() {
