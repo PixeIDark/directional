@@ -1,6 +1,7 @@
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import AuthButton from "./components/AuthButton";
+import { PATHS } from "../../router/path.ts";
 
 function HomePage() {
   const { isLoggedIn } = useAuth();
@@ -11,7 +12,7 @@ function HomePage() {
       alert("로그인 후 이용해주세요.");
       return;
     }
-    navigate("/posts");
+    navigate(PATHS.POSTS.LIST);
   };
 
   return (
