@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { mocksApi } from "../../api/mock.ts";
+import { chartsApi } from "../../api/charts.ts";
 import type {
   TopCoffeeBrandItem,
   PopularSnackBrandItem,
@@ -27,12 +27,12 @@ function ChartsPage() {
   useEffect(() => {
     const fetchData = async () => {
       const [coffee, snack, mood, workout, coffeeData, snackData] = await Promise.all([
-        mocksApi.getTopCoffeeBrands(),
-        mocksApi.getPopularSnackBrands(),
-        mocksApi.getWeeklyMoodTrend(),
-        mocksApi.getWeeklyWorkoutTrend(),
-        mocksApi.getCoffeeConsumption(),
-        mocksApi.getSnackImpact(),
+        chartsApi.getTopCoffeeBrands(),
+        chartsApi.getPopularSnackBrands(),
+        chartsApi.getWeeklyMoodTrend(),
+        chartsApi.getWeeklyWorkoutTrend(),
+        chartsApi.getCoffeeConsumption(),
+        chartsApi.getSnackImpact(),
       ]);
 
       setTopCoffeeBrands(coffee);

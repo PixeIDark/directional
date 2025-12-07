@@ -16,7 +16,7 @@ interface SnackImpactResponse {
   departments: SnackImpactDepartment[];
 }
 
-export const mocksApi = {
+export const chartsApi = {
   getTopCoffeeBrands: async (): Promise<TopCoffeeBrandItem[]> => {
     const { data } = await apiClient.get<TopCoffeeBrandItem[]>("/mock/top-coffee-brands");
     return data;
