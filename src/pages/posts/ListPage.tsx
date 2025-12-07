@@ -5,6 +5,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import type { Post, Category } from "../../types/post.ts";
 import { CATEGORIES } from "../../constants/post.ts";
 import Header from "../../components/Header.tsx";
+import { useQueryFilters } from "../hooks/useQueryFilters.ts";
 
 type ColumnKey = "id" | "title" | "category" | "tags" | "userId" | "createdAt";
 
@@ -28,9 +29,7 @@ const STORAGE_KEY = "post-postList-column-widths";
 const loadColumnWidths = (): Record<ColumnKey, number> => {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      return JSON.parse(saved);
-    }
+    if (saved) return JSON.parse(saved);
   } catch (error) {
     console.error("로컬스토리지 로드 실패:", error);
   }
@@ -52,21 +51,20 @@ const saveColumnWidths = (widths: Record<ColumnKey, number>) => {
   }
 };
 
+// TODO: 리팩토링
+// 1. 검색 훅 분리
+// 2. 무한스크롤 훅 분리
+// 3. 리사이즈 훅 분리
+// 4. 컬럼 가시성 컴포넌트 분리
+// 5. 정렬, 필터 컴포넌트 분리
 function ListPage() {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const { filters, handleFilterSubmit, handleSortChange } = useQueryFilters();
   const [postList, setPostList] = useState<Post[]>([]);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const observerRef = useRef<HTMLDivElement>(null);
   const tableRef = useRef<HTMLTableElement>(null);
-
-  const filters = {
-    sort: (searchParams.get("sort") as "createdAt" | "title") || "createdAt",
-    order: (searchParams.get("order") as "desc" | "asc") || "desc",
-    category: searchParams.get("category") as Category | undefined,
-    search: searchParams.get("search") || "",
-  };
-
+  const [columnWidths, setColumnWidths] = useState<Record<ColumnKey, number>>(loadColumnWidths());
   const [visibleColumns, setVisibleColumns] = useState({
     id: true,
     title: true,
@@ -75,8 +73,6 @@ function ListPage() {
     userId: true,
     createdAt: true,
   });
-
-  const [columnWidths, setColumnWidths] = useState<Record<ColumnKey, number>>(loadColumnWidths());
 
   const [resizing, setResizing] = useState<{
     leftColumn: ColumnKey | null;
@@ -186,38 +182,6 @@ function ListPage() {
     saveColumnWidths(columnWidths);
   }, [columnWidths]);
 
-  const handleFilterSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-
-    const newParams: Record<string, string> = {};
-    const search = formData.get("search") as string;
-    const category = formData.get("category") as string;
-    const sort = formData.get("sort") as string;
-    const order = formData.get("order") as string;
-
-    if (search) newParams.search = search;
-    if (category) newParams.category = category;
-    if (sort) newParams.sort = sort;
-    if (order) newParams.order = order;
-
-    setSearchParams(newParams);
-  };
-
-  const handleSort = (column: "createdAt" | "title") => {
-    const newOrder = filters.sort === column && filters.order === "asc" ? "desc" : "asc";
-
-    const newParams: Record<string, string> = {
-      sort: column,
-      order: newOrder,
-    };
-
-    if (filters.search) newParams.search = filters.search;
-    if (filters.category) newParams.category = filters.category;
-
-    setSearchParams(newParams);
-  };
-
   const toggleColumn = (column: ColumnKey) => setVisibleColumns((prev) => ({ ...prev, [column]: !prev[column] }));
 
   const startResize = (leftColumn: ColumnKey, rightColumn: ColumnKey, e: React.MouseEvent) => {
@@ -231,16 +195,18 @@ function ListPage() {
     });
   };
 
-  const columns: { key: ColumnKey; label: string; sortable?: boolean }[] = [
+  const columns: { key: ColumnKey; label: string }[] = [
     { key: "id", label: "ID" },
-    { key: "title", label: "제목", sortable: true },
+    { key: "title", label: "제목" },
     { key: "category", label: "카테고리" },
     { key: "tags", label: "태그" },
     { key: "userId", label: "작성자" },
-    { key: "createdAt", label: "작성일", sortable: true },
+    { key: "createdAt", label: "작성일" },
   ];
 
   const visibleColumnKeys = columns.filter((col) => visibleColumns[col.key]).map((col) => col.key);
+
+  const sortValue = `${filters.sort}-${filters.order}`;
 
   return (
     <div className="h-full">
@@ -265,32 +231,32 @@ function ListPage() {
             </option>
           ))}
         </select>
-        <select name="sort" defaultValue={filters.sort} className="rounded border px-3 py-2">
-          <option value="createdAt">작성일</option>
-          <option value="title">제목</option>
-        </select>
-        <select name="order" defaultValue={filters.order} className="rounded border px-3 py-2">
-          <option value="desc">내림차순</option>
-          <option value="asc">오름차순</option>
-        </select>
         <button type="submit" className="rounded bg-gray-700 px-4 py-2 text-white hover:bg-gray-800">
           검색
         </button>
       </form>
-      <div className="mb-4 flex gap-4">
-        <span className="font-semibold">컬럼:</span>
-        {columns.map(({ key, label }) => (
-          <label key={key} className="flex items-center gap-1">
-            <input type="checkbox" checked={visibleColumns[key]} onChange={() => toggleColumn(key)} />
-            {label}
-          </label>
-        ))}
+      <div className="mb-4 flex justify-between">
+        <div className="flex items-center gap-4">
+          <span className="font-semibold">컬럼:</span>
+          {columns.map(({ key, label }) => (
+            <label key={key} className="flex items-center gap-1">
+              <input type="checkbox" checked={visibleColumns[key]} onChange={() => toggleColumn(key)} />
+              {label}
+            </label>
+          ))}
+        </div>
+        <select value={sortValue} onChange={handleSortChange} className="outline-none focus:ring-0 focus:outline-none">
+          <option value="createdAt-desc">작성일 내림차순</option>
+          <option value="createdAt-asc">작성일 오름차순</option>
+          <option value="title-desc">제목 내림차순</option>
+          <option value="title-asc">제목 오름차순</option>
+        </select>
       </div>
       <div className="overflow-x-auto">
         <table ref={tableRef} className="w-full border-collapse border" style={{ tableLayout: "fixed" }}>
           <thead>
             <tr className="bg-gray-100">
-              {columns.map(({ key, label, sortable }) => {
+              {columns.map(({ key, label }) => {
                 if (!visibleColumns[key]) return null;
                 const currentIndex = visibleColumnKeys.indexOf(key);
                 const nextKey = visibleColumnKeys[currentIndex + 1];
@@ -300,21 +266,7 @@ function ListPage() {
                     className="relative border px-4 py-2 text-left"
                     style={{ width: `${columnWidths[key]}%` }}
                   >
-                    <div className="overflow-hidden text-ellipsis whitespace-nowrap">
-                      {sortable ? (
-                        <button
-                          onClick={() => {
-                            if (key === "createdAt" || key === "title") handleSort(key);
-                          }}
-                          className="flex items-center gap-1 hover:text-blue-600"
-                        >
-                          {label}
-                          {filters.sort === key && <span>{filters.order === "asc" ? "↑" : "↓"}</span>}
-                        </button>
-                      ) : (
-                        label
-                      )}
-                    </div>
+                    <div className="overflow-hidden text-ellipsis whitespace-nowrap">{label}</div>
                     {nextKey && (
                       <div
                         className="absolute top-0 right-0 h-full w-1 cursor-col-resize bg-gray-300 hover:bg-blue-500"
