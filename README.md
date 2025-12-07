@@ -1,6 +1,10 @@
 ## 프로젝트 실행 방법
 
 ```bash
+git clone https://github.com/PixeIDark/directional.git
+
+cd directional
+
 npm install
 
 echo "VITE_API_BASE_URL=https://fe-hiring-rest-api.vercel.app" > .env
