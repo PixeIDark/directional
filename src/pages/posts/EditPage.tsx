@@ -11,16 +11,16 @@ function EditPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { id } = useParams<{ id: string }>();
-  const [board, setBoard] = useState<Post | null>(location.state);
+  const [post, setPost] = useState<Post | null>(location.state);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const fetchPost = async () => {
-      if (!board && id) {
+      if (!post && id) {
         setIsLoading(true);
         try {
           const post = await postsApi.getDetail(id);
-          setBoard(post);
+          setPost(post);
         } catch (err) {
           console.error("게시글 로드 실패:", err);
         } finally {
@@ -30,7 +30,7 @@ function EditPage() {
     };
 
     fetchPost();
-  }, [board, id]);
+  }, [post, id]);
 
   if (!id) return null;
 
@@ -51,10 +51,10 @@ function EditPage() {
   };
 
   const defaultValue = {
-    title: board?.title ?? "",
-    body: board?.body ?? "",
-    tags: board?.tags.join(", ") ?? "",
-    category: board?.category,
+    title: post?.title ?? "",
+    body: post?.body ?? "",
+    tags: post?.tags.join(", ") ?? "",
+    category: post?.category,
   };
 
   return (
