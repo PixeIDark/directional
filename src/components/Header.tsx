@@ -1,5 +1,5 @@
 import { PATHS } from "../router/path.ts";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 interface HeaderProps {
   title: string;
@@ -7,9 +7,6 @@ interface HeaderProps {
 }
 
 function Header({ title, children }: HeaderProps) {
-  const location = useLocation();
-  console.log(location);
-
   return (
     <div className="mb-4 flex w-full items-center justify-between">
       <Link to={PATHS.HOME} className="flex items-center gap-1">
