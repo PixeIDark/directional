@@ -109,7 +109,7 @@ function ListPage() {
 
   return (
     <div className="h-full">
-      <Header title="게시글 조회">
+      <Header title="게시글 목록">
         <Link to={PATHS.POSTS.NEW} className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600">
           글쓰기
         </Link>
