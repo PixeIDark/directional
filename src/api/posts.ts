@@ -1,7 +1,7 @@
 import type { Post, Category } from "../types/post.ts";
 import { apiClient } from "./client.ts";
 
-interface GetPostsParams {
+export interface GetPostsParams {
   limit?: number;
   prevCursor?: string;
   nextCursor?: string;
