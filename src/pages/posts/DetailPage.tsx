@@ -59,7 +59,7 @@ function DetailPage() {
   if (!board) return <div className="py-8 text-center text-gray-500">게시글을 찾을 수 없습니다.</div>;
 
   return (
-    <div className="h-full w-full py-4">
+    <div className="h-full w-full">
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-bold">게시글 상세</h1>
         <Link to={PATHS.POSTS.LIST} className="rounded bg-gray-500 px-4 py-2 text-white hover:bg-gray-600">
