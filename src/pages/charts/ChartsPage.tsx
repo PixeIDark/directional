@@ -9,8 +9,8 @@ import type {
   SnackImpactDepartment,
 } from "../../types/mock.ts";
 import BarDonutChart from "./components/BarDonutChart.tsx";
-import MultiLineChart from "./components/MultiLineChart.tsx";
 import StackedChart from "./components/StackedChart.tsx";
+import { MultiLineChart } from "./components/MultiLineChart";
 
 function ChartsPage() {
   const [topCoffeeBrands, setTopCoffeeBrands] = useState<TopCoffeeBrandItem[]>([]);
@@ -44,11 +44,9 @@ function ChartsPage() {
 
   return (
     <div className="h-full w-full space-y-12">
-      <h1 className="text-2xl font-bold">차트 대시보드</h1>
-
+      <h1 className="text-2xl font-bold">데이터 시각화</h1>
       <BarDonutChart title="커피 브랜드 인기도" data={topCoffeeBrands} dataKey="popularity" nameKey="brand" />
       <BarDonutChart title="인기 스낵 브랜드" data={popularSnackBrands} dataKey="share" nameKey="name" />
-
       <StackedChart title="주간 기분 트렌드 (%)" data={weeklyMoodTrend} dataKeys={["happy", "tired", "stressed"]} />
       <StackedChart
         title="주간 운동 트렌드 (%)"
