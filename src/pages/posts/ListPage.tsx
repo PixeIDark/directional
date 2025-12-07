@@ -1,11 +1,13 @@
 import { type GetPostsParams, postsApi } from "../../api/posts.ts";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { PATHS } from "../../router/path.ts";
 import { useEffect, useRef, useState, useCallback } from "react";
-import type { Post, Category } from "../../types/post.ts";
+import type { Post } from "../../types/post.ts";
 import { CATEGORIES } from "../../constants/post.ts";
 import Header from "../../components/Header.tsx";
 import { useQueryFilters } from "../hooks/useQueryFilters.ts";
+import { useInfiniteScroll } from "../hooks/useInfiniteScroll.ts";
+import { useColumnResize } from "../hooks/useColumnResize.ts";
 
 type ColumnKey = "id" | "title" | "category" | "tags" | "userId" | "createdAt";
 
@@ -24,37 +26,18 @@ const MIN_COLUMN_WIDTHS: Record<ColumnKey, number> = {
   createdAt: 10,
 };
 
+const INITIAL_COLUMN_WIDTHS: Record<ColumnKey, number> = {
+  id: 8,
+  title: 45,
+  category: 10,
+  tags: 10,
+  userId: 10,
+  createdAt: 14,
+};
+
 const STORAGE_KEY = "post-postList-column-widths";
 
-const loadColumnWidths = (): Record<ColumnKey, number> => {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) return JSON.parse(saved);
-  } catch (error) {
-    console.error("로컬스토리지 로드 실패:", error);
-  }
-  return {
-    id: 8,
-    title: 45,
-    category: 10,
-    tags: 10,
-    userId: 10,
-    createdAt: 14,
-  };
-};
-
-const saveColumnWidths = (widths: Record<ColumnKey, number>) => {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(widths));
-  } catch (error) {
-    console.error("로컬스토리지 저장 실패:", error);
-  }
-};
-
 // TODO: 리팩토링
-// 1. 검색 훅 분리
-// 2. 무한스크롤 훅 분리
-// 3. 리사이즈 훅 분리
 // 4. 컬럼 가시성 컴포넌트 분리
 // 5. 정렬, 필터 컴포넌트 분리
 function ListPage() {
@@ -62,9 +45,15 @@ function ListPage() {
   const [postList, setPostList] = useState<Post[]>([]);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const observerRef = useRef<HTMLDivElement>(null);
   const tableRef = useRef<HTMLTableElement>(null);
-  const [columnWidths, setColumnWidths] = useState<Record<ColumnKey, number>>(loadColumnWidths());
+
+  const { columnWidths, startResize } = useColumnResize<ColumnKey>({
+    initialWidths: INITIAL_COLUMN_WIDTHS,
+    minWidths: MIN_COLUMN_WIDTHS,
+    storageKey: STORAGE_KEY,
+    tableRef,
+  });
+
   const [visibleColumns, setVisibleColumns] = useState({
     id: true,
     title: true,
@@ -73,14 +62,6 @@ function ListPage() {
     userId: true,
     createdAt: true,
   });
-
-  const [resizing, setResizing] = useState<{
-    leftColumn: ColumnKey | null;
-    rightColumn: ColumnKey | null;
-    startX: number;
-    leftStartWidth: number;
-    rightStartWidth: number;
-  }>({ leftColumn: null, rightColumn: null, startX: 0, leftStartWidth: 0, rightStartWidth: 0 });
 
   const fetchPosts = useCallback(
     async (cursor?: string | null) => {
@@ -111,89 +92,18 @@ function ListPage() {
     [filters.sort, filters.order, filters.category, filters.search]
   );
 
+  const { observerRef } = useInfiniteScroll({
+    fetcher: () => fetchPosts(nextCursor!),
+    enabled: !!nextCursor && !isLoading,
+  });
+
   useEffect(() => {
     setPostList([]);
     setNextCursor(null);
     fetchPosts();
   }, [fetchPosts]);
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && nextCursor && !isLoading) {
-          fetchPosts(nextCursor);
-        }
-      },
-      { threshold: 1.0 }
-    );
-    if (observerRef.current) observer.observe(observerRef.current);
-    return () => observer.disconnect();
-  }, [nextCursor, isLoading, fetchPosts]);
-
-  useEffect(() => {
-    if (!resizing.leftColumn || !resizing.rightColumn) return;
-
-    const leftColumn = resizing.leftColumn;
-    const rightColumn = resizing.rightColumn;
-
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!tableRef.current) return;
-
-      const tableWidth = tableRef.current.offsetWidth;
-      const diff = e.clientX - resizing.startX;
-      const diffPercent = (diff / tableWidth) * 100;
-
-      const leftMin = MIN_COLUMN_WIDTHS[leftColumn];
-      const rightMin = MIN_COLUMN_WIDTHS[rightColumn];
-
-      const totalWidth = resizing.leftStartWidth + resizing.rightStartWidth;
-
-      let newLeftWidth = resizing.leftStartWidth + diffPercent;
-      let newRightWidth = resizing.rightStartWidth - diffPercent;
-
-      if (newLeftWidth < leftMin) {
-        newLeftWidth = leftMin;
-        newRightWidth = totalWidth - leftMin;
-      }
-      if (newRightWidth < rightMin) {
-        newRightWidth = rightMin;
-        newLeftWidth = totalWidth - rightMin;
-      }
-
-      setColumnWidths((prev) => ({
-        ...prev,
-        [leftColumn]: newLeftWidth,
-        [rightColumn]: newRightWidth,
-      }));
-    };
-
-    const handleMouseUp = () =>
-      setResizing({ leftColumn: null, rightColumn: null, startX: 0, leftStartWidth: 0, rightStartWidth: 0 });
-
-    document.addEventListener("mousemove", handleMouseMove);
-    document.addEventListener("mouseup", handleMouseUp);
-    return () => {
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
-    };
-  }, [resizing]);
-
-  useEffect(() => {
-    saveColumnWidths(columnWidths);
-  }, [columnWidths]);
-
   const toggleColumn = (column: ColumnKey) => setVisibleColumns((prev) => ({ ...prev, [column]: !prev[column] }));
-
-  const startResize = (leftColumn: ColumnKey, rightColumn: ColumnKey, e: React.MouseEvent) => {
-    e.preventDefault();
-    setResizing({
-      leftColumn,
-      rightColumn,
-      startX: e.clientX,
-      leftStartWidth: columnWidths[leftColumn],
-      rightStartWidth: columnWidths[rightColumn],
-    });
-  };
 
   const columns: { key: ColumnKey; label: string }[] = [
     { key: "id", label: "ID" },
