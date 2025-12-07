@@ -5,7 +5,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import type { Post, Category } from "../../types/post.ts";
 import { CATEGORIES } from "../../constants/post.ts";
 
-type ColumnKey = "id" | "title" | "category" | "tags" | "createdAt";
+type ColumnKey = "id" | "title" | "category" | "tags" | "userId" | "createdAt";
 
 const CATEGORY_COLORS = {
   NOTICE: "bg-red-100 text-red-700",
@@ -15,9 +15,10 @@ const CATEGORY_COLORS = {
 
 const MIN_COLUMN_WIDTHS: Record<ColumnKey, number> = {
   id: 5,
-  title: 15,
-  category: 10,
-  tags: 15,
+  title: 6,
+  category: 9,
+  tags: 7,
+  userId: 8,
   createdAt: 10,
 };
 
@@ -34,10 +35,11 @@ const loadColumnWidths = (): Record<ColumnKey, number> => {
   }
   return {
     id: 8,
-    title: 35,
-    category: 15,
-    tags: 25,
-    createdAt: 17,
+    title: 45,
+    category: 10,
+    tags: 10,
+    userId: 10,
+    createdAt: 14,
   };
 };
 
@@ -68,6 +70,7 @@ function ListPage() {
     title: true,
     category: true,
     tags: true,
+    userId: true,
     createdAt: true,
   });
 
@@ -220,13 +223,14 @@ function ListPage() {
     { key: "title", label: "제목", sortable: true },
     { key: "category", label: "카테고리" },
     { key: "tags", label: "태그" },
+    { key: "userId", label: "작성자" },
     { key: "createdAt", label: "작성일", sortable: true },
   ];
 
   const visibleColumnKeys = columns.filter((col) => visibleColumns[col.key]).map((col) => col.key);
 
   return (
-    <div className="h-full p-4">
+    <div className="h-full">
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-bold">게시글 목록</h1>
         <Link to={PATHS.POSTS.NEW} className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600">
@@ -344,6 +348,9 @@ function ListPage() {
                       ))}
                     </div>
                   </td>
+                )}
+                {visibleColumns.userId && (
+                  <td className="overflow-hidden border px-4 py-2 text-ellipsis whitespace-nowrap">{post.userId}</td>
                 )}
                 {visibleColumns.createdAt && (
                   <td className="overflow-hidden border px-4 py-2 text-ellipsis whitespace-nowrap">
