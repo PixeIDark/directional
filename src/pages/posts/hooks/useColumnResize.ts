@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { loadFromStorage } from "../../utils/storage.ts";
+import { loadFromStorage } from "../../../utils/storage.ts";
 
 interface UseColumnResizeParams<T extends string> {
   initialWidths: Record<T, number>;

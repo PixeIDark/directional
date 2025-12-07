@@ -1,5 +1,5 @@
 import { useSearchParams } from "react-router-dom";
-import type { Category } from "../../types/post.ts";
+import type { Category } from "../types/post.ts";
 
 export function useQueryFilters() {
   const [searchParams, setSearchParams] = useSearchParams();
