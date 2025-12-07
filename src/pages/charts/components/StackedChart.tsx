@@ -1,38 +1,40 @@
+import { useMemo } from "react";
 import { BarChart, Bar, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import type { WeeklyMoodItem, WeeklyWorkoutItem } from "../../../types/mock.ts";
 import { useChartState } from "../hooks/useChartState.ts";
 import ChartLegend from "./ChartLegend.tsx";
 
-interface StackedChartProps {
-  title: string;
-  data: WeeklyMoodItem[] | WeeklyWorkoutItem[];
-  dataKeys: string[];
+interface StackedDataPoint {
+  category: string;
+  [key: string]: string | number;
 }
 
-function StackedChart({ title, data, dataKeys }: StackedChartProps) {
-  const { colors, hiddenKeys, handleColorChange, toggleVisibility } = useChartState({ keys: dataKeys });
+interface StackedChartProps {
+  title: string;
+  data: StackedDataPoint[];
+  categoryKey: string;
+  stackKeys: string[];
+}
 
-  const convertToPercent = (data: WeeklyMoodItem[] | WeeklyWorkoutItem[]) => {
+function StackedChart({ title, data, categoryKey, stackKeys }: StackedChartProps) {
+  const { colors, hiddenKeys, handleColorChange, toggleVisibility } = useChartState({ keys: stackKeys });
+
+  const percentData = useMemo(() => {
     return data.map((item) => {
-      const values = Object.entries(item)
-        .filter(([key]) => key !== "week")
-        .map(([, value]) => value as number);
+      const values = stackKeys.map((key) => item[key] as number);
       const total = values.reduce((sum, val) => sum + val, 0);
-      const result: Record<string, string | number> = { week: item.week };
-      Object.entries(item).forEach(([key, value]) => {
-        if (key !== "week") result[key] = Number((((value as number) / total) * 100).toFixed(1));
+      const result: Record<string, string | number> = { [categoryKey]: item[categoryKey] };
+      stackKeys.forEach((key) => {
+        result[key] = Number((((item[key] as number) / total) * 100).toFixed(1));
       });
       return result;
     });
-  };
-
-  const percentData = convertToPercent(data);
+  }, [data, categoryKey, stackKeys]);
 
   return (
     <section>
       <h2 className="mb-4 text-xl font-semibold">{title}</h2>
       <ChartLegend
-        keys={dataKeys}
+        keys={stackKeys}
         colors={colors}
         hiddenKeys={hiddenKeys}
         onColorChange={handleColorChange}
@@ -44,10 +46,10 @@ function StackedChart({ title, data, dataKeys }: StackedChartProps) {
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={percentData}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="week" />
+              <XAxis dataKey={categoryKey} />
               <YAxis />
               <Tooltip />
-              {dataKeys.map((key) =>
+              {stackKeys.map((key) =>
                 !hiddenKeys.has(key) ? <Bar key={key} dataKey={key} stackId="a" fill={colors[key]} /> : null
               )}
             </BarChart>
@@ -58,10 +60,10 @@ function StackedChart({ title, data, dataKeys }: StackedChartProps) {
           <ResponsiveContainer width="100%" height={300}>
             <AreaChart data={percentData}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="week" />
+              <XAxis dataKey={categoryKey} />
               <YAxis />
               <Tooltip />
-              {dataKeys.map((key) =>
+              {stackKeys.map((key) =>
                 !hiddenKeys.has(key) ? (
                   <Area key={key} type="monotone" dataKey={key} stackId="1" fill={colors[key]} />
                 ) : null

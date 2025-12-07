@@ -13,18 +13,23 @@ import {
 } from "recharts";
 import { useChartState } from "../hooks/useChartState.ts";
 import ChartLegend from "./ChartLegend.tsx";
-import type { TopCoffeeBrandItem, PopularSnackBrandItem } from "../../../types/mock.ts";
+
+interface ChartItem {
+  name: string;
+  value: number;
+  [key: string]: string | number;
+}
 
 interface BarDonutChartProps {
   title: string;
-  data: TopCoffeeBrandItem[] | PopularSnackBrandItem[];
-  dataKey: string;
-  nameKey: string;
+  data: ChartItem[];
 }
 
-function BarDonutChart({ title, data, dataKey, nameKey }: BarDonutChartProps) {
-  const keys = useMemo(() => data.map((item) => String(item[nameKey as keyof typeof item])), [data, nameKey]);
+function BarDonutChart({ title, data }: BarDonutChartProps) {
+  const keys = useMemo(() => data.map((item) => item.name), [data]);
   const { colors, hiddenKeys, handleColorChange, toggleVisibility } = useChartState({ keys });
+
+  const filteredData = useMemo(() => data.filter((item) => !hiddenKeys.has(item.name)), [data, hiddenKeys]);
 
   return (
     <section>
@@ -40,21 +45,14 @@ function BarDonutChart({ title, data, dataKey, nameKey }: BarDonutChartProps) {
         <div className="rounded-lg border p-4">
           <h3 className="mb-2 text-center font-medium">바 차트</h3>
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={data as unknown as Record<string, unknown>[]}>
+            <BarChart data={data}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey={nameKey} />
+              <XAxis dataKey="name" />
               <YAxis />
               <Tooltip />
-              <Bar dataKey={dataKey}>
+              <Bar dataKey="value">
                 {data.map((entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={
-                      hiddenKeys.has(String(entry[nameKey as keyof typeof entry]))
-                        ? "transparent"
-                        : colors[String(entry[nameKey as keyof typeof entry])]
-                    }
-                  />
+                  <Cell key={`cell-${index}`} fill={hiddenKeys.has(entry.name) ? "transparent" : colors[entry.name]} />
                 ))}
               </Bar>
             </BarChart>
@@ -65,24 +63,18 @@ function BarDonutChart({ title, data, dataKey, nameKey }: BarDonutChartProps) {
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie
-                data={
-                  data.filter(
-                    (item) => !hiddenKeys.has(String(item[nameKey as keyof typeof item]))
-                  ) as unknown as Record<string, unknown>[]
-                }
-                dataKey={dataKey}
-                nameKey={nameKey}
+                data={filteredData}
+                dataKey="value"
+                nameKey="name"
                 cx="50%"
                 cy="50%"
                 innerRadius={60}
                 outerRadius={100}
                 label
               >
-                {data
-                  .filter((item) => !hiddenKeys.has(String(item[nameKey as keyof typeof item])))
-                  .map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={colors[String(entry[nameKey as keyof typeof entry])]} />
-                  ))}
+                {filteredData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={colors[entry.name]} />
+                ))}
               </Pie>
               <Tooltip />
             </PieChart>

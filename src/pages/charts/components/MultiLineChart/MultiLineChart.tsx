@@ -1,41 +1,41 @@
 import { useMemo } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from "recharts";
-import type { CoffeeTeam, SnackImpactDepartment } from "../../../../types/mock.ts";
 import { useChartState } from "../../hooks/useChartState.ts";
-import { useMultiLineChart } from "./hooks/useMultiLineChart.ts";
 import ChartLegend from "../ChartLegend.tsx";
+import { useChartInteraction } from "./hooks/useChartInteraction.ts";
+
+interface ChartDataPoint {
+  [key: string]: number | string;
+}
+
+interface SeriesConfig {
+  name: string;
+  leftMetric: string;
+  rightMetric: string;
+}
 
 interface MultiLineChartProps {
   title: string;
-  data: CoffeeTeam[] | SnackImpactDepartment[];
+  data: ChartDataPoint[];
+  series: SeriesConfig[];
   xAxisKey: string;
   xAxisLabel: string;
   leftYAxisLabel: string;
   rightYAxisLabel: string;
-  leftMetric: string;
-  rightMetric: string;
-  type: "coffee" | "snack";
 }
 
 function MultiLineChart({
   title,
   data,
+  series,
   xAxisKey,
   xAxisLabel,
   leftYAxisLabel,
   rightYAxisLabel,
-  leftMetric,
-  rightMetric,
-  type,
 }: MultiLineChartProps) {
-  const keys = useMemo(() => data.map((item) => ("team" in item ? item.team : item.name)), [data]);
+  const keys = useMemo(() => series.map((s) => s.name), [series]);
   const { colors, hiddenKeys, handleColorChange, toggleVisibility } = useChartState({ keys });
-  const { hoveredDot, setHoveredDot, tooltipData, chartData, handleDotEnter, handleDotLeave } = useMultiLineChart({
-    data,
-    xAxisKey,
-    leftMetric,
-    rightMetric,
-  });
+  const { hoveredDot, setHoveredDot, tooltipData, handleDotEnter, handleDotLeave } = useChartInteraction();
 
   return (
     <section>
@@ -49,7 +49,7 @@ function MultiLineChart({
       />
       <div className="relative rounded-lg border p-4">
         <ResponsiveContainer width="100%" height={400}>
-          <LineChart data={chartData}>
+          <LineChart data={data}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey={xAxisKey} label={{ value: xAxisLabel, position: "insideBottom", offset: -4 }} />
             <YAxis yAxisId="left" label={{ value: leftYAxisLabel, angle: -90, position: "insideLeft", dy: 20 }} />
@@ -58,15 +58,14 @@ function MultiLineChart({
               orientation="right"
               label={{ value: rightYAxisLabel, angle: 90, position: "insideRight", dy: 20 }}
             />
-            {data.map((item) => {
-              const name = "team" in item ? item.team : item.name;
-              const series = "series" in item ? item.series : item.metrics;
+            {series.map(({ name, leftMetric, rightMetric }) => {
+              if (hiddenKeys.has(name)) return null;
 
-              return !hiddenKeys.has(name) ? (
+              return (
                 <g key={name}>
                   <Line
                     yAxisId="left"
-                    dataKey={`${name}_${leftMetric}`}
+                    dataKey={leftMetric}
                     stroke={colors[name]}
                     strokeWidth={2}
                     dot={(props) => {
@@ -75,7 +74,6 @@ function MultiLineChart({
 
                       const dotId = `${name}_${leftMetric}_${index}`;
                       const isHovered = hoveredDot === dotId;
-                      const pointData = series[index];
 
                       return (
                         <circle
@@ -85,13 +83,12 @@ function MultiLineChart({
                           fill={colors[name]}
                           onMouseMove={(e) => {
                             setHoveredDot(dotId);
-                            handleDotEnter(
-                              e,
-                              name,
-                              payload[xAxisKey],
-                              pointData[leftMetric as keyof typeof pointData] as number,
-                              pointData[rightMetric as keyof typeof pointData] as number
-                            );
+                            handleDotEnter(e, {
+                              team: name,
+                              xValue: payload[xAxisKey],
+                              leftValue: payload[leftMetric],
+                              rightValue: payload[rightMetric],
+                            });
                           }}
                           onMouseLeave={handleDotLeave}
                           style={{ cursor: "pointer" }}
@@ -99,11 +96,10 @@ function MultiLineChart({
                       );
                     }}
                     activeDot={false}
-                    name={`${name}_${leftMetric}`}
                   />
                   <Line
                     yAxisId="right"
-                    dataKey={`${name}_${rightMetric}`}
+                    dataKey={rightMetric}
                     stroke={colors[name]}
                     strokeWidth={2}
                     strokeDasharray="5 5"
@@ -114,7 +110,6 @@ function MultiLineChart({
                       const dotId = `${name}_${rightMetric}_${index}`;
                       const isHovered = hoveredDot === dotId;
                       const size = isHovered ? 10 : 8;
-                      const pointData = series[index];
 
                       return (
                         <rect
@@ -125,13 +120,12 @@ function MultiLineChart({
                           fill={colors[name]}
                           onMouseMove={(e) => {
                             setHoveredDot(dotId);
-                            handleDotEnter(
-                              e,
-                              name,
-                              payload[xAxisKey],
-                              pointData[leftMetric as keyof typeof pointData] as number,
-                              pointData[rightMetric as keyof typeof pointData] as number
-                            );
+                            handleDotEnter(e, {
+                              team: name,
+                              xValue: payload[xAxisKey],
+                              leftValue: payload[leftMetric],
+                              rightValue: payload[rightMetric],
+                            });
                           }}
                           onMouseLeave={handleDotLeave}
                           style={{ cursor: "pointer" }}
@@ -139,10 +133,9 @@ function MultiLineChart({
                       );
                     }}
                     activeDot={false}
-                    name={`${name}_${rightMetric}`}
                   />
                 </g>
-              ) : null;
+              );
             })}
           </LineChart>
         </ResponsiveContainer>
@@ -158,7 +151,6 @@ function MultiLineChart({
             <p className="mb-1 font-semibold">{tooltipData.team}</p>
             <p className="text-sm">
               {xAxisLabel}: {tooltipData.xValue}
-              {type === "coffee" ? "잔" : "개"}
             </p>
             <p className="text-sm">
               {leftYAxisLabel}: {tooltipData.leftValue}
