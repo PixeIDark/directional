@@ -1,14 +1,11 @@
 import { z } from "zod";
 import { CATEGORIES } from "../constants/post.ts";
-import type { Category } from "../types/post.ts";
 
 export const MAX_TITLE_LENGTH = 80;
 export const MAX_BODY_LENGTH = 2000;
 export const MAX_TAGS_COUNT = 5;
 export const MAX_TAG_LENGTH = 24;
 export const BEN_WORDS = ["캄보디아", "프놈펜", "불법체류", "텔레그램"];
-
-const CATEGORY_KEYS = Object.keys(CATEGORIES) as [...Category[]];
 
 const checkBannedWords = (value: string, ctx: z.RefinementCtx) => {
   const foundWords = BEN_WORDS.filter((word) => value.includes(word));
@@ -59,7 +56,7 @@ const baseSchema = z.object({
     .refine(validateTagCount, { message: `태그는 최대 ${MAX_TAGS_COUNT}개까지 입력 가능합니다` })
     .refine(validateTagLength, { message: `각 태그는 최대 ${MAX_TAG_LENGTH}자까지 입력 가능합니다` })
     .refine(validateTagDuplication, { message: "각 태그는 중복이 불가능합니다." }),
-  category: z.enum(CATEGORY_KEYS, { message: "카테고리를 선택해주세요" }),
+  category: z.enum(CATEGORIES, { message: "카테고리를 선택해주세요" }),
 });
 
 export const postSchema = baseSchema;
