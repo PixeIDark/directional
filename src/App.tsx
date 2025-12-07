@@ -6,8 +6,7 @@ function App() {
   return (
     <AuthProvider>
       <div className="relative mx-4">
-        <div className="fixed top-0 w-full bg-white text-center"></div>
-        <div className="flex h-screen flex-col items-center justify-center">
+        <div className="flex h-screen max-w-950 flex-col items-center justify-center">
           <RouterProvider router={router} />
         </div>
       </div>
