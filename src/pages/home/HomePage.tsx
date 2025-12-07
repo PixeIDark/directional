@@ -1,5 +1,6 @@
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import AuthButton from "./components/AuthButton";
 
 function HomePage() {
   const { isLoggedIn } = useAuth();
@@ -21,6 +22,7 @@ function HomePage() {
       <Link to="/charts" className="text-blue-600 underline">
         데이터 시각화
       </Link>
+      <AuthButton />
     </div>
   );
 }
