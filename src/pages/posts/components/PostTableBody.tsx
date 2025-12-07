@@ -20,14 +20,14 @@ function PostTableBody({ posts, visibleColumns }: PostTableBodyProps) {
         <tr key={post.id} className="hover:bg-gray-50">
           {visibleColumns.id && (
             <td className="overflow-hidden border px-4 py-2 text-ellipsis whitespace-nowrap">
-              <Link to={PATHS.POSTS.DETAIL(post.id)} state={post} className="text-blue-600 hover:underline">
+              <Link to={PATHS.POSTS.DETAIL(post.id)} state={post} className="text-gray-800 hover:underline">
                 {post.id}
               </Link>
             </td>
           )}
           {visibleColumns.title && (
             <td className="overflow-hidden border px-4 py-2 text-ellipsis whitespace-nowrap">
-              <Link to={PATHS.POSTS.DETAIL(post.id)} state={post} className="text-blue-600 hover:underline">
+              <Link to={PATHS.POSTS.DETAIL(post.id)} state={post} className="text-gray-800 hover:underline">
                 {post.title}
               </Link>
             </td>
@@ -49,10 +49,12 @@ function PostTableBody({ posts, visibleColumns }: PostTableBodyProps) {
             </td>
           )}
           {visibleColumns.userId && (
-            <td className="overflow-hidden border px-4 py-2 text-ellipsis whitespace-nowrap">{post.userId}</td>
+            <td className="overflow-hidden border px-4 py-2 text-ellipsis whitespace-nowrap text-gray-800">
+              {post.userId}
+            </td>
           )}
           {visibleColumns.createdAt && (
-            <td className="overflow-hidden border px-4 py-2 text-ellipsis whitespace-nowrap">
+            <td className="overflow-hidden border px-4 py-2 text-ellipsis whitespace-nowrap text-gray-800">
               {new Date(post.createdAt).toLocaleString("ko-KR")}
             </td>
           )}
