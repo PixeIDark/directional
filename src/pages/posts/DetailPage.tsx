@@ -63,7 +63,7 @@ function DetailPage() {
         </Link>
       </Header>
       <div className="space-y-6 rounded-lg border border-gray-300 bg-white p-6">
-        <div className="border-b pb-4">
+        <div className="border-b border-gray-300 pb-4">
           <div className="mb-2 flex items-center gap-2">
             <h2 className="text-xl font-semibold">{board.title}</h2>
             <span className={`rounded px-2 py-1 text-xs ${CATEGORY_COLORS[board.category]}`}>{board.category}</span>
@@ -72,7 +72,7 @@ function DetailPage() {
         </div>
         <div className="min-h-44 whitespace-pre-wrap text-gray-700">{board.body}</div>
         {board.tags.length > 0 && (
-          <div className="flex flex-wrap gap-2 border-t pt-4">
+          <div className="flex flex-wrap gap-2 border-t border-gray-300 pt-4">
             {board.tags.map((tag, idx) => (
               <span key={idx} className="rounded bg-gray-200 px-2 py-1 text-sm">
                 {tag}
