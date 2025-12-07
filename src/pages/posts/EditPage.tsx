@@ -1,5 +1,5 @@
 import PostForm from "./components/PostForm.tsx";
-import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import type { PostFormDataOutput } from "../../schemas/postSchema.ts";
 import { postsApi } from "../../api/posts.ts";
@@ -46,7 +46,11 @@ function EditPage() {
     }
   };
 
-  const handleCancel = () => {
+  const handleClickList = () => {
+    if (confirm("작성 중인 내용이 저장되지 않습니다. 이동하시겠습니까?")) navigate(PATHS.POSTS.LIST);
+  };
+
+  const handleClickCancel = () => {
     if (confirm("작성 중인 내용이 저장되지 않습니다. 취소하시겠습니까?")) navigate(PATHS.POSTS.DETAIL(id));
   };
 
@@ -60,14 +64,18 @@ function EditPage() {
   return (
     <div className="h-full w-full">
       <Header title="게시글 수정">
-        <Link to={PATHS.POSTS.LIST} className="rounded bg-gray-500 px-4 py-2 text-white hover:bg-gray-600">
+        <button
+          onClick={handleClickList}
+          type="button"
+          className="rounded bg-gray-500 px-4 py-2 text-white hover:bg-gray-600"
+        >
           목록
-        </Link>
+        </button>
       </Header>
       <PostForm
         defaultValues={defaultValue}
         onSubmit={handleFormSubmit}
-        onCancel={handleCancel}
+        onCancel={handleClickCancel}
         submitButtonText="등록"
         isLoading={isLoading}
       />
